@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TPW\TPW.csproj" />
+    <ProjectReference Include="..\TPW\Data.csproj" />
   </ItemGroup>
 
 </Project>

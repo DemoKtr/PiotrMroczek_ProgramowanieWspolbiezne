@@ -1,40 +1,28 @@
-using TPW;
+using Data;
+
 namespace Testing
 {
     [TestClass]
     public class UnitTest1
     {
-        Class1 klasa = new Class1();
-        
+        DataAbstractAPI test;
         [TestMethod]
-        public void TestMethod1()
+        public void BallTest()
         {
-            Assert.AreEqual(klasa.add(1, 3), 4);
-
+            test = DataAbstractAPI.CreateBall(1, 2);
+            Assert.AreEqual(test.getPositionX(), 1);
+            Assert.AreEqual(test.getPositionY(), 2);
         }
         [TestMethod]
-        public void TestMethod2()
+        public void TestBallSetValues()
         {
-            Assert.AreEqual(klasa.subtract(3, 1), 2);
-
-        }
-        [TestMethod]
-        public void TestMethod3()
-        {
-            Assert.AreEqual(klasa.multiply(1, 3), 3);
-
-        }
-        [TestMethod]
-        public void TestMethod4()
-        {
-            Assert.AreEqual(klasa.divide(6, 2), 3);
-
-        }
-        [TestMethod]
-        public void TestMethod5()
-        {
-            Assert.AreEqual(klasa.pow(2), 4);
-
+            test = DataAbstractAPI.CreateBall(2, 3);
+            Assert.AreEqual(test.getPositionX(), 2);
+            Assert.AreEqual(test.getPositionY(), 3);
+            test.setPositionX(5);
+            test.setPositionY(10);
+            Assert.AreEqual(test.getPositionX(), 5);
+            Assert.AreEqual(test.getPositionY(), 10);
         }
     }
 }
