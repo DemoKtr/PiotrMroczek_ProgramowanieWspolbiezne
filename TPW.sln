@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data", "TPW\Data.csproj", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTests", "Testing\DataTests.csproj", "{438B3BEE-8F17-472F-83E5-662311FB6E0A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logic", "ClassLibrary1\Logic.csproj", "{C247D78D-75E0-49E9-9CF9-733914576B43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "View", "View\View.csproj", "{EA8D9DBC-D00E-459E-A4CC-301FD4D80807}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{438B3BEE-8F17-472F-83E5-662311FB6E0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{438B3BEE-8F17-472F-83E5-662311FB6E0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{438B3BEE-8F17-472F-83E5-662311FB6E0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C247D78D-75E0-49E9-9CF9-733914576B43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C247D78D-75E0-49E9-9CF9-733914576B43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C247D78D-75E0-49E9-9CF9-733914576B43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C247D78D-75E0-49E9-9CF9-733914576B43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA8D9DBC-D00E-459E-A4CC-301FD4D80807}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA8D9DBC-D00E-459E-A4CC-301FD4D80807}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA8D9DBC-D00E-459E-A4CC-301FD4D80807}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA8D9DBC-D00E-459E-A4CC-301FD4D80807}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
