@@ -9,7 +9,7 @@ using Logic;
 
 namespace Model
 {
-    internal class Model
+    public class Model
     {
         private readonly Vector2 boardSize;
         private int ballsAmount;

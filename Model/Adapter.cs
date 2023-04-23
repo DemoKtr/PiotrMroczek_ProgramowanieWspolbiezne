@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    internal class AdapterEventArgs : EventArgs
+    public class AdapterEventArgs : EventArgs
     {
         public readonly Vector2 Position;
         public readonly int Id;

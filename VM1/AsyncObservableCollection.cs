@@ -27,15 +27,12 @@ namespace VM1
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
        
-                RaiseCollectionChanged(e);
+                RaisePropertyChanged(e);
            
            
         }
 
-        private void RaiseCollectionChanged(object param)
-        {
-            base.OnCollectionChanged((NotifyCollectionChangedEventArgs)param);
-        }
+       
 
         protected override void OnPropertyChanged(PropertyChangedEventArgs e)
         {
@@ -52,6 +49,42 @@ namespace VM1
         private void RaisePropertyChanged(object param)
         {
             base.OnPropertyChanged((PropertyChangedEventArgs)param);
+        }
+        protected override void InsertItem(int index, T item)
+        {
+            ExecuteOnSyncContext(() => base.InsertItem(index, item));
+        }
+
+        private void ExecuteOnSyncContext(Action action)
+        {
+            if (SynchronizationContext.Current == _synchronizationContext)
+            {
+                action();
+            }
+            else
+            {
+                _synchronizationContext.Send(_ => action(), null);
+            }
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            ExecuteOnSyncContext(() => base.RemoveItem(index));
+        }
+
+        protected override void SetItem(int index, T item)
+        {
+            ExecuteOnSyncContext(() => base.SetItem(index, item));
+        }
+
+        protected override void MoveItem(int oldIndex, int newIndex)
+        {
+            ExecuteOnSyncContext(() => base.MoveItem(oldIndex, newIndex));
+        }
+
+        protected override void ClearItems()
+        {
+            ExecuteOnSyncContext(() => base.ClearItems());
         }
     }
 }

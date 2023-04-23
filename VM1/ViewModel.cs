@@ -6,33 +6,82 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace VM1
+
 {
-    internal class ViewModel
+    public class ViewModel : INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler? PropertyChanged;
+        private Model.Model model;
+        public AsyncObservableCollection<BallPosition> Balls { get; set; }
+        public ICommand AddButton { get; }
+        public ICommand RemoveButton { get; }
+        public ICommand StartButton { get; }
+        public ICommand StopButton { get; }
+
+        public ViewModel()
+        {
+            Balls = new AsyncObservableCollection<BallPosition>();
+
+            model = new Model.Model();
+            BallsCount = 5;
+
+            AddButton = new RelayCommand(() =>
+            {
+                BallsCount += 1;
+            });
+            RemoveButton = new RelayCommand(() =>
+            {
+                BallsCount -= 1;
+            });
+
+            StartButton = new RelayCommand(() =>
+            {
+                model.SetBallNumber(BallsCount);
+
+                for (int i = 0; i < BallsCount; i++)
+                {
+                    Balls.Add(new BallPosition());
+                }
+
+                model.BallPositionChange += (sender, argv) =>
+                {
+                    if (Balls.Count > 0)
+                        Balls[argv.Id].ChangePosition(argv.Position);
+                };
+                model.StartSimulation();
+            });
+
+            StopButton = new RelayCommand(() =>
+            {
+                model.StopSimulation();
+                Balls.Clear();
+                model.SetBallNumber(BallsCount);
+
+            });
+        }
+        public int BallsCount
+        {
+            get { return model.GetBallsCount(); }
+            set
+            {
+                if (value >= 0)
+                {
+                    model.SetBallNumber(value);
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        // Updates
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string caller = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(caller));
+        }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -84,4 +133,5 @@ namespace VM1
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(caller));
         }
     }
+
 }

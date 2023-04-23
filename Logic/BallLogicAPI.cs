@@ -17,7 +17,7 @@ namespace Logic
         public abstract void Start();
         public abstract void Stop();
         public abstract int GetBallsNumber();
-        public abstract IList<Ilogic> GetBalls();
+        public abstract List<BallLogicAPI> GetBalls();
 
         public static BallLogicAPI CreateBallsLogic(Vector2 boardSize, BallAbstractApi dataApi = default(BallAbstractApi))
         {

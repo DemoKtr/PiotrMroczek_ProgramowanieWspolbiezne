@@ -11,6 +11,7 @@ namespace Logic
     internal class BallLogic : BallLogicAPI
 
     {
+        public CancellationTokenSource CancelSimulationSource { get; private set; }
         public  float Radius;
         public  float Mass;
         private readonly BallAbstractApi dataBalls;
@@ -26,13 +27,17 @@ namespace Logic
 
         public override void AddBall(Vector2 position)
         {
-            
-            dataBalls.Add(BallAbstractApi.CreateBall(position));
+            if (position.X < 0 || position.X > BoardSize.X || position.Y < 0 || position.Y > BoardSize.Y) { }
+            else { dataBalls.Add(BallAbstractApi.CreateBall(position)); }
+                
         }
 
-        public override IList<Ilogic> GetBalls()
+        public override List<BallLogicAPI> GetBalls()
         {
-            throw new NotImplementedException();
+            List<BallLogicAPI> ballsList = new List<BallLogicAPI>();
+            for (var i = 0; i < dataBalls.GetBallNumber(); i++) ballsList.Add(new BallLogic(dataBalls, this.BoardSize));
+
+            return ballsList;
         }
 
         public override int GetBallsNumber()
@@ -50,12 +55,24 @@ namespace Logic
 
         public override void Stop()
         {
-            throw new NotImplementedException();
+            CancelSimulationSource.Cancel();
         }
 
         public override void AddBalls(int amount)
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < amount; i++)
+            {
+                var randomPoint = GetRandomPointInsideBoard();
+                dataBalls.Add(BallAbstractApi.CreateBall(randomPoint));
+            }
+        }
+        private Vector2 GetRandomPointInsideBoard()
+        {
+            var rng = new Random();
+            var x = rng.Next((int)Radius, (int)(BoardSize.X - Radius));
+            var y = rng.Next((int)Radius, (int)(BoardSize.Y - Radius));
+
+            return new Vector2(x, y);
         }
     }
 }
