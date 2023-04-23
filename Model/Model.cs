@@ -1,54 +1,61 @@
-﻿using Logic
-using Logic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
+using System.Text;
+using System.Threading.Tasks;
+using Data;
+using Logic;
 
 namespace Model
 {
-    public class Model
+    internal class Model
     {
-        private LogicAbstractApi logic;
-        private double X;
-        private double Y;
+        private readonly Vector2 boardSize;
+        private int ballsAmount;
+        private BallLogicAPI ballsLogic;
 
-        public BallModel()
+        public event EventHandler<AdapterEventArgs>? BallPositionChange;
+
+        public Model()
         {
-            logic = LogicApi.CreateObjLogic();
-            X = logic.getBallPosition().X;
-            Y = logic.getBallPosition().Y;
+            boardSize = new Vector2(650, 400);
+            ballsAmount = 0;
+            ballsLogic = BallLogicAPI.CreateBallsLogic(boardSize);
+            ballsLogic.PositionChange += (sender, args) =>
+            {
+                BallPositionChange?.Invoke(this, new AdapterEventArgs(args.Ball.Position, args.Ball.Id));
+            };
+        }
+        public void StartSimulation()
+        {
+            ballsLogic.AddBalls(ballsAmount);
+            ballsLogic.Start();
         }
 
-        public double ModelXPosition
+        public void StopSimulation()
         {
-            get
+            ballsLogic.Stop();
+            ballsLogic = BallLogicAPI.CreateBallsLogic(boardSize);
+            ballsLogic.PositionChange += (sender, args) =>
             {
-                return logic.getBallPosition().X;
-            }
-            set
-            {
-                logic.setBallXPosition(value);
-            }
+                BallPositionChange?.Invoke(this, new AdapterEventArgs(args.Ball.Position, args.Ball.Id));
+            };
         }
 
-        public double ModelYPosition
+        public void SetBallNumber(int amount)
         {
-            get
-            {
-                return logic.getBallPosition().Y;
-            }
-            set
-            {
-                logic.setBallYPosition(value);
-            }
+            ballsAmount = amount;
         }
 
-        public Vector2 getModelPosition()
+        public int GetBallsCount()
         {
-            return new Vector2((float)ModelXPosition, (float)ModelYPosition);
+            return ballsAmount;
         }
 
-        public Vector2 GetBallPosition()
+        public void OnBallPositionChange(AdapterEventArgs args)
         {
-            return logic.PutBallOnBoard();
+            BallPositionChange?.Invoke(this, args);
         }
     }
 }

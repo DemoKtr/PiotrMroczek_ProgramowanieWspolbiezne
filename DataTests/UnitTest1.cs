@@ -5,7 +5,6 @@ namespace Testing
     [TestClass]
     public class UnitTest1
     {
-        /*
         DataAbstractAPI test;
         [TestMethod]
         public void BallTest()
@@ -24,6 +23,6 @@ namespace Testing
             test.setPositionY(10);
             Assert.AreEqual(test.getPositionX(), 5);
             Assert.AreEqual(test.getPositionY(), 10);
-        }*/
+        }
     }
 }
