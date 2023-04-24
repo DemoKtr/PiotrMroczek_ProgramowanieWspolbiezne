@@ -29,15 +29,7 @@ namespace Data
             return ballList.Count;
         }
 
-        public override float GetMass()
-        {
-            return 10;
-        }
-
-        public override float GetRadius()
-        {
-            return 20;
-        }
+      
 
         //Na przyszlosc
         public override void Remove(IBall ball)

@@ -17,7 +17,8 @@ namespace Logic
         public abstract void Start();
         public abstract void Stop();
         public abstract int GetBallsNumber();
-        public abstract List<BallLogicAPI> GetBalls();
+        
+        public abstract List<Ilogic> GetBalls();
 
         public static BallLogicAPI CreateBallsLogic(Vector2 boardSize, BallAbstractApi dataApi = default(BallAbstractApi))
         {
@@ -32,5 +33,6 @@ namespace Logic
             PositionChange?.Invoke(this, args);
         }
 
+        
     }
 }

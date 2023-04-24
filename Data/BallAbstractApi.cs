@@ -13,8 +13,6 @@ namespace Data
         public abstract IBall Get(int index);
         public abstract void Remove(IBall ball);
         public abstract int GetBallNumber();
-        public abstract float GetMass();
-        public abstract float GetRadius();
         public static BallAbstractApi CreateList() { return new BallList(); }
         public static IBall CreateBall(Vector2 position) { return new Ball(position); }
     }

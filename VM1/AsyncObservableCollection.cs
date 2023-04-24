@@ -26,10 +26,18 @@ namespace VM1
 
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
-       
-                RaisePropertyChanged(e);
-           
-           
+
+            if (SynchronizationContext.Current == _synchronizationContext)
+            {
+                // Execute the CollectionChanged event on the current thread
+                RaiseCollectionChanged(e);
+            }
+            else
+            {
+                // Raises the CollectionChanged event on the creator thread
+                _synchronizationContext.Send(RaiseCollectionChanged, e);
+            }
+
         }
 
        
@@ -48,8 +56,15 @@ namespace VM1
 
         private void RaisePropertyChanged(object param)
         {
+            // We are in the creator thread, call the base implementation directly
             base.OnPropertyChanged((PropertyChangedEventArgs)param);
         }
+        private void RaiseCollectionChanged(object param)
+        {
+            // We are in the creator thread, call the base implementation directly
+            base.OnCollectionChanged((NotifyCollectionChangedEventArgs)param);
+        }
+
         protected override void InsertItem(int index, T item)
         {
             ExecuteOnSyncContext(() => base.InsertItem(index, item));

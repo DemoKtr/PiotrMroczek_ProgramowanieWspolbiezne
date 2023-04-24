@@ -15,6 +15,7 @@ namespace Data
         float Speed { get; set; }
         float Radius { get; set; }
        
+       
 
 
         

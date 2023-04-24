@@ -22,6 +22,6 @@ namespace Data
         public float Mass { get; set; }
         public float Speed { get; set; }
         public float Radius { get; set; }
-
+       
     }
 }
