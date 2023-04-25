@@ -20,7 +20,7 @@ namespace VM1
         public ICommand RemoveButton { get; }
         public ICommand StartButton { get; }
         public ICommand StopButton { get; }
-
+        private bool bisSimulating=false;
         public ViewModel()
         {
             Balls = new AsyncObservableCollection<BallPosition>();
@@ -41,6 +41,7 @@ namespace VM1
 
             StartButton = new RelayCommand(() =>
             {
+                if (!bisSimulating) { 
                 model.SetBallNumber(BallsCount);
 
                 for (int i = 0; i < BallsCount; i++)
@@ -54,13 +55,18 @@ namespace VM1
                         Balls[argv.Id].ChangePosition(argv.Position);
                 };
                 model.StartSimulation();
+                    bisSimulating = true;
+                }
             });
 
             StopButton = new RelayCommand(() =>
             {
+                if (bisSimulating) { 
                 model.StopSimulation();
                 Balls.Clear();
                 model.SetBallNumber(BallsCount);
+                    bisSimulating=false;
+                }
 
             });
         }
