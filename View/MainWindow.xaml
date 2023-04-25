@@ -6,31 +6,29 @@
         xmlns:local="clr-namespace:View"
         xmlns:vm="clr-namespace:VM1;assembly=VM1"
         mc:Ignorable="d"
-        Title="Zadanie1" Height="450" Width="800">
+        Title="Zadanie1" Height="600" Width="800">
 
     <Window.DataContext>
         <vm:ViewModel/>
     </Window.DataContext>
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="700"/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
-            <Button Content="➕" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Command="{Binding AddButton}"/>
-            <Label HorizontalContentAlignment="Center" 
-				    Content="{Binding BallsCount}" />
-            <Button Content="➖" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Command="{Binding RemoveButton}"/>
-            <Button Content="Stop" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Command="{Binding StopButton}"/>
-            <Button Content="Start"
-                    Command="{Binding StartButton}"/>
+
+    <Grid Background="LightSeaGreen">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="185,0,0,0">
+            <Button Content="ADD" Margin="20" Padding="10" Command="{Binding AddButton}"/>
+            <Label FontSize="36" Content="{Binding BallsCount}" Margin="20,0"/>
+            <Button Content="Remove" Margin="20" Padding="10" Command="{Binding RemoveButton}"/>
+            <Button Content="Stop" Margin="20" Padding="10" Command="{Binding StopButton}"/>
+            <Button Content="Start" Margin="20" Padding="10" Command="{Binding StartButton}"/>
         </StackPanel>
-        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+
+        <StackPanel Grid.Row="1" VerticalAlignment="Center">
             <Canvas x:Name="BallCanvas" Height="400" Width="650">
-                <Border BorderBrush="#707070" BorderThickness="1" Height="400" Width="650"/>
+                <Border BorderBrush="#707070" BorderThickness="1" Height="417" Width="662" Canvas.Top="8" Canvas.Left="14" HorizontalAlignment="Left" VerticalAlignment="Top"/>
 
                 <ItemsControl ItemsSource="{Binding Path = Balls}">
                     <ItemsControl.ItemTemplate>
@@ -48,7 +46,6 @@
 
             </Canvas>
         </StackPanel>
-        <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Height="100" Margin="300,359,0,0" VerticalAlignment="Top" Width="6"/>
-    </Grid>
 
+    </Grid>
 </Window>
