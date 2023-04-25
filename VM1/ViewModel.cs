@@ -30,7 +30,7 @@ namespace VM1
 
             AddButton = new RelayCommand(() =>
             {
-                if(BallsCount <= 10)
+                if(BallsCount < 10)
                 BallsCount += 1;
             });
             RemoveButton = new RelayCommand(() =>
