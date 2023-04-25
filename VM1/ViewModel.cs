@@ -26,15 +26,17 @@ namespace VM1
             Balls = new AsyncObservableCollection<BallPosition>();
 
             model = new Model.Model();
-            BallsCount = 5;
+            BallsCount = 0;
 
             AddButton = new RelayCommand(() =>
             {
+                if(BallsCount <= 10)
                 BallsCount += 1;
             });
             RemoveButton = new RelayCommand(() =>
             {
-                BallsCount -= 1;
+                if (BallsCount > 0)
+                    BallsCount -= 1;
             });
 
             StartButton = new RelayCommand(() =>
