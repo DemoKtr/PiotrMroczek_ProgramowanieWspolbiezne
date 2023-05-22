@@ -9,11 +9,6 @@ namespace Logic
 {
     public class ChangePositionEventArgs : EventArgs
     {
-        public  Ilogic Ball;
-
-        public ChangePositionEventArgs(Ilogic ball)
-        {
-            this.Ball = ball;
-        }
+     
     }
 }

@@ -15,17 +15,13 @@ namespace Model
         private int ballsAmount;
         private BallLogicAPI ballsLogic;
 
-        public event EventHandler<AdapterEventArgs>? BallPositionChange;
+        public event EventHandler<OnPositionChangeEventArgs>? BallPositionChange;
 
         public Model()
         {
             boardSize = new Vector2(650, 400);
             ballsAmount = 0;
-            ballsLogic = BallLogicAPI.CreateBallsLogic(boardSize);
-            ballsLogic.PositionChange += (sender, args) =>
-            {
-                BallPositionChange?.Invoke(this, new AdapterEventArgs(args.Ball.Position, args.Ball.Id));
-            };
+            this.PrepareBallsLogic();
         }
         public void StartSimulation()
         {
@@ -36,11 +32,7 @@ namespace Model
         public void StopSimulation()
         {
             ballsLogic.Stop();
-            ballsLogic = BallLogicAPI.CreateBallsLogic(boardSize);
-            ballsLogic.PositionChange += (sender, args) =>
-            {
-                BallPositionChange?.Invoke(this, new AdapterEventArgs(args.Ball.Position, args.Ball.Id));
-            };
+            this.PrepareBallsLogic();
         }
 
         public void SetBallNumber(int amount)
@@ -53,9 +45,14 @@ namespace Model
             return ballsAmount;
         }
 
-        public void OnBallPositionChange(AdapterEventArgs args)
+        private void PrepareBallsLogic()
         {
-            BallPositionChange?.Invoke(this, args);
+            ballsLogic = BallLogicAPI.CreateBallsLogic(boardSize);
+            ballsLogic.PositionChange += this.OnBallsLogicOnPositionChange;
+        }
+        private void OnBallsLogicOnPositionChange(object sender, Logic.OnPositionChangeEventArgs args)
+        {
+            BallPositionChange?.Invoke(this, new OnPositionChangeEventArgs(new ModelBallAdapter(args.Ball)));
         }
     }
 }

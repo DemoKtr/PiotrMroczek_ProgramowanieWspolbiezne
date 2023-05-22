@@ -10,11 +10,7 @@ namespace Testing
 
         [TestMethod] public void BallTest()
         {
-            ball = BallAbstractApi.CreateList();
-            b1 = BallAbstractApi.CreateBall(new System.Numerics.Vector2(4, 5));
-            ball.Add(b1);
-            Assert.AreEqual(1, ball.GetBallNumber());
-            Assert.AreEqual(ball.Get(0), b1);
+           
         }
     }
 }

@@ -11,151 +11,135 @@ namespace Logic
     internal class BallLogic : BallLogicAPI
 
     {
-        public CancellationTokenSource CancelSimulationSource { get; private set; }
-        public  float Radius;
-        public  float Mass;
-        private readonly BallAbstractApi dataBalls;
-        public Vector2 BoardSize { get; }
         
-        public BallLogic(BallAbstractApi dataBalls, Vector2 boardSize)
+        private readonly Mutex simulationPauseMutex = new(false);
+        private readonly BallAbstractApi dataBalls;
+       
+        
+        public BallLogic(BallAbstractApi dataBalls)
         {
             this.dataBalls = dataBalls;
-            BoardSize = boardSize;
-            Radius = 10;
-            Mass = 5;
-            CancelSimulationSource = new CancellationTokenSource();
-            
+ 
 
         }
 
-        public override void AddBall(Vector2 position)
+        public override void AddBalls(int howMany)
         {
-            if (position.X < 0 || position.X > BoardSize.X || position.Y < 0 || position.Y > BoardSize.Y) { }
-            else { dataBalls.Add(BallAbstractApi.CreateBall(position)); }
-                
+            dataBalls.Add(howMany);
+
         }
 
-        public override List<Ilogic> GetBalls()
-        {
-            List<Ilogic> ballsList = new List<Ilogic>();
-            for (var i = 0; i < dataBalls.GetBallNumber(); i++) ballsList.Add(new LogicBallDecorator(dataBalls.Get(i), i, this));
+       
 
-            return ballsList;
-        }
-
-        public override int GetBallsNumber()
-        {
-            return dataBalls.GetBallNumber();
-        }
-
+      
         public override void Start()
         {
-            if (CancelSimulationSource.IsCancellationRequested) return;
 
-            CancelSimulationSource = new CancellationTokenSource();
-            for (int i = 0; i < dataBalls.GetBallNumber(); i++)
+            dataBalls.PositionChange += this.OnDataBallsOnPositionChange;
+            dataBalls.Start();
+        }
+
+        private void OnDataBallsOnPositionChange(object _, Data.OnPositionChangeEventArgs args)
+        {
+            this.HandleBallsCollisions(args.SenderBall, args.Balls);
+            CollisionHandler.CollideWithWalls(args.SenderBall, dataBalls.BoardSize);
+            var newArgs = new OnPositionChangeEventArgs(new LogicBallAdapter(args.SenderBall));
+            this.OnPositionChange(newArgs);
+        }
+
+
+        private void HandleBallsCollisions(IBall ball, IList<IBall> allBalls)
+        {
+            simulationPauseMutex.WaitOne();
+            try
             {
-                var ball = new LogicBallDecorator(dataBalls.Get(i), i, this);
-                ball.PositionChange += (_, args) => OnPositionChange(args);
-                Task.Factory.StartNew(ball.Simulate, CancelSimulationSource.Token);
+                var collidedBall = CollisionHandler.CheckCollisions(ball, allBalls);
+                if (collidedBall != null)
+                {
+                    CollisionHandler.HandleCollision(ball, collidedBall);
+                }
+            }
+            finally
+            {
+                simulationPauseMutex.ReleaseMutex();
             }
         }
 
         public override void Stop()
         {
-            CancelSimulationSource.Cancel();
+            dataBalls.Stop();
         }
 
-        public override void AddBalls(int amount)
-        {
-            for (int i = 0; i < amount; i++)
-            {
-                Vector2 randomPoint = this.GetRandomPointInsideBoard();
-                dataBalls.Add(BallAbstractApi.CreateBall(randomPoint));
-            }
-        }
-        private Vector2 GetRandomPointInsideBoard()
-        {
-            var rng = new Random();
-            var x = rng.Next((int)Radius, (int)(BoardSize.X - Radius));
-            var y = rng.Next((int)Radius, (int)(BoardSize.Y - Radius));
-
-            return new Vector2(x, y);
-        }
 
       
     }
 
-    internal class LogicBallDecorator : Ilogic
+    internal class CollisionHandler
     {
-        private readonly IBall ball;
-        private readonly BallLogic owner;
-        private Random rng;
-        public event EventHandler<ChangePositionEventArgs>? PositionChange;
-        public int Id { get; private set; }
-        Vector2 direction;
-        private int frameCounter = 0;
-        private int changeDirectionFrequency = 1000;
-
-        public LogicBallDecorator(IBall ball, int id, BallLogic owner)
+        public static IBall? CheckCollisions(IBall ball, IEnumerable<IBall> ballsList)
         {
-            this.ball = ball;
-            this.owner = owner;
-            this.Id = id;
-            rng = new Random();
-            direction = GetRandomNormalizedVector();
-        }
-
-        public LogicBallDecorator(Vector2 position, int id, BallLogic owner)
-        {
-            ball = BallAbstractApi.CreateBall(position);
-            this.Id = id;
-            this.owner = owner;
-            rng = new Random();
-        }
-
-        public Vector2 Position
-        {
-            get => ball.Position;
-            set => ball.Position = value;
-        }
-
-        public async void Simulate()
-        {
-            while (!owner.CancelSimulationSource.Token.IsCancellationRequested)
+            foreach (var ballTwo in ballsList)
             {
-                Position = GetRandomPointInsideBoard();
-                PositionChange?.Invoke(this, new ChangePositionEventArgs(this));
+                if (ReferenceEquals(ball, ballTwo))
+                {
+                    continue;
+                }
 
-                
+                if (IsBallsCollides(ball, ballTwo))
+                {
+                    return ballTwo;
+                }
+            }
+
+            return null;
+        }
+
+        private static bool IsBallsCollides(IBall ballOne, IBall ballTwo)
+        {
+            var centerOne = ballOne.Position + (Vector2.One * ballOne.Radius / 2) + ballOne.Velocity * (16 / 1000f);
+            var centerTwo = ballTwo.Position + (Vector2.One * ballTwo.Radius / 2) + ballTwo.Velocity * (16 / 1000f);
+
+            var distance = Vector2.Distance(centerOne, centerTwo);
+            var radiusSum = (ballOne.Radius + ballTwo.Radius) / 2f;
+
+            return distance <= radiusSum;
+        }
+
+        public static void CollideWithWalls(IBall ball, Vector2 boardSize)
+        {
+            var position = ball.Position + ball.Velocity * (16 / 1000f);
+            if (position.X <= 0 || position.X + ball.Radius >= boardSize.X)
+            {
+                ball.Velocity = new Vector2(-ball.Velocity.X, ball.Velocity.Y);
+            }
+
+            if (position.Y <= 0 || position.Y + ball.Radius >= boardSize.Y)
+            {
+                ball.Velocity = new Vector2(ball.Velocity.X, -ball.Velocity.Y);
             }
         }
 
-        private Vector2 GetRandomPointInsideBoard()
+        public static void HandleCollision(IBall ballOne, IBall ballTwo)
         {
+            var centerOne = ballOne.Position + (Vector2.One * ballOne.Radius / 2);
+            var centerTwo = ballTwo.Position + (Vector2.One * ballTwo.Radius / 2);
 
-            Vector2 newPosition = Position + direction/1000;
+            var unitNormalVector = Vector2.Normalize(centerTwo - centerOne);
+            var unitTangentVector = new Vector2(-unitNormalVector.Y, unitNormalVector.X);
 
-            if (newPosition.X <= owner.Radius || newPosition.X >= owner.BoardSize.X - owner.Radius)
-            {
-                direction = GetRandomNormalizedVector();
-            }
+            var velocityOneNormal = Vector2.Dot(unitNormalVector, ballOne.Velocity);
+            var velocityOneTangent = Vector2.Dot(unitTangentVector, ballOne.Velocity);
+            var velocityTwoNormal = Vector2.Dot(unitNormalVector, ballTwo.Velocity);
+            var velocityTwoTangent = Vector2.Dot(unitTangentVector, ballTwo.Velocity);
 
-            if (newPosition.Y <= owner.Radius || newPosition.Y >= owner.BoardSize.Y - owner.Radius)
-            {
-                direction = GetRandomNormalizedVector();
-            }
+            var newNormalVelocityOne = (velocityOneNormal * (ballOne.Mass - ballTwo.Mass) + 2 * ballTwo.Mass * velocityTwoNormal) / (ballOne.Mass + ballTwo.Mass);
+            var newNormalVelocityTwo = (velocityTwoNormal * (ballTwo.Mass - ballOne.Mass) + 2 * ballOne.Mass * velocityOneNormal) / (ballOne.Mass + ballTwo.Mass);
 
-            return newPosition;
-        }
+            var newVelocityOne = Vector2.Multiply(unitNormalVector, newNormalVelocityOne) + Vector2.Multiply(unitTangentVector, velocityOneTangent);
+            var newVelocityTwo = Vector2.Multiply(unitNormalVector, newNormalVelocityTwo) + Vector2.Multiply(unitTangentVector, velocityTwoTangent);
 
-
-        private Vector2 GetRandomNormalizedVector()
-        {
-            var x = (float)(rng.NextDouble() - 0.5) * 2;
-            var y = (float)(rng.NextDouble() - 0.5) * 2;
-            var result = new Vector2(x, y);
-            return Vector2.Normalize(result);
+            ballOne.Velocity = newVelocityOne;
+            ballTwo.Velocity = newVelocityTwo;
         }
     }
 }

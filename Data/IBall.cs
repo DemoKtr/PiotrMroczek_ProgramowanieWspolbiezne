@@ -9,15 +9,22 @@ namespace Data
 {
     public interface IBall 
     {
-        Vector2 Position { get; set; }
+        Vector2 Position { get; }
         Vector2 Velocity { get; set; }
-        float Mass { get; set; }
-        float Speed { get; set; }
-        float Radius { get; set; }
-       
-       
+        float Mass { get;  }
+        float Radius { get; }
+        int ID { get; }
+        public void Simulate();
 
+        public event EventHandler<OnBallPositionChangeEventArgs>? PositionChange;
+    }
+    public class OnBallPositionChangeEventArgs
+    {
+        public IBall Ball;
 
-        
+        public OnBallPositionChangeEventArgs(IBall ball)
+        {
+            this.Ball = ball;
+        }
     }
 }

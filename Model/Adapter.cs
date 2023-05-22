@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Logic;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -7,15 +8,34 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    public class AdapterEventArgs : EventArgs
+    public interface IModel
     {
-        public readonly Vector2 Position;
-        public readonly int Id;
+        Vector2 Position { get; }
+        float Radius { get; }
+        int ID { get; }
+    }
 
-        public AdapterEventArgs(Vector2 position, int id)
+    public class ModelBallAdapter : IModel
+
+    {
+        private readonly Ilogic ball;
+
+
+        public ModelBallAdapter(Ilogic ball)
         {
-            this.Position = position;
-            Id = id;
+            this.ball = ball;
+        }
+        public Vector2 Position { get => ball.Position; }
+        public float Radius { get => ball.Radius; }
+        public int ID { get => ball.ID; }
+    }
+    public class OnPositionChangeEventArgs : EventArgs
+    {
+        public readonly IModel Ball;
+
+        public OnPositionChangeEventArgs(IModel ball)
+        {
+            Ball = ball;
         }
     }
 }
