@@ -58,15 +58,9 @@ namespace Data
         }
         private Vector2 ClampPosition(Vector2 nextPosition)
         {
-            if (nextPosition.X < 0)
-                nextPosition.X = -1;
-            if (Radius + nextPosition.X > owner.BoardSize.X)
-                nextPosition.X = owner.BoardSize.X - Radius + 1;
-
-            if (nextPosition.Y < 0)
-                nextPosition.Y = -1;
-            if (Radius + nextPosition.Y > owner.BoardSize.Y)
-                nextPosition.Y = owner.BoardSize.Y - Radius + 1;
+            Vector2 boardLimit = new Vector2(owner.BoardSize.X - Radius + 1, owner.BoardSize.Y - Radius + 1);
+            nextPosition.X = Math.Clamp(nextPosition.X, -1, boardLimit.X);
+            nextPosition.Y = Math.Clamp(nextPosition.Y, -1, boardLimit.Y);
             return nextPosition;
         }
 
