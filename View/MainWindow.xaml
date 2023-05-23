@@ -19,9 +19,9 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="185,0,0,0">
-            <Button Content="ADD" Margin="20" Padding="10" Command="{Binding AddButton}"/>
-            <Label FontSize="36" Content="{Binding BallsCount}" Margin="20,0"/>
-            <Button Content="Remove" Margin="20" Padding="10" Command="{Binding RemoveButton}"/>
+            <Button Content="ADD" Margin="20" Padding="10" Command="{Binding AddButton}" Width="98"/>
+            <Label FontSize="36" Content="{Binding BallsCount}" Margin="20,0" Width="33"/>
+            <Button Content="Remove" Margin="20" Padding="10" Command="{Binding RemoveButton}" Width="89"/>
             <Button Content="Stop" Margin="20" Padding="10" Command="{Binding StopButton}"/>
             <Button Content="Start" Margin="20" Padding="10" Command="{Binding StartButton}"/>
         </StackPanel>
