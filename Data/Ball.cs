@@ -11,6 +11,7 @@ namespace Data
     internal class Ball : IBall
     {
         private readonly BallAbstractApi owner;
+        Task task;
         public Ball(int ID, Vector2 position, float radius, float weight, Vector2 velocity, BallAbstractApi owner)
         {
             Position = position;
@@ -32,25 +33,40 @@ namespace Data
         public async Task Simulate()
         {
             var sw = new Stopwatch();
-            var deltaTime = 0f;
+            var deltaTime = 0.001f;
             while (!owner.CancelSimulationSource.Token.IsCancellationRequested)
             {
+                sw.Reset();
                 sw.Start();
                 var newArgs = new OnBallPositionChangeEventArgs(this);
                 PositionChange?.Invoke(this, newArgs);
+                
                 var nextPosition = Position + Vector2.Multiply(Velocity, deltaTime);
                 Position = this.ClampPosition(nextPosition);
-                await Task.Delay(8, owner.CancelSimulationSource.Token).ContinueWith(_ => { });
+                await Task.Delay(4 , owner.CancelSimulationSource.Token).ContinueWith(_ => { });
                 sw.Stop();
-                deltaTime = sw.ElapsedMilliseconds / 1000f;
-                sw.Reset();
+
+                deltaTime = sw.ElapsedMilliseconds / 1000f ;
+                
             }
+        }
+
+        public void CreateMovementTask()
+        {
+            
+            task = Simulate();
         }
         private Vector2 ClampPosition(Vector2 nextPosition)
         {
-            Vector2 boardLimit = new Vector2(owner.BoardSize.X - Radius + 1, owner.BoardSize.Y - Radius + 1);
-            nextPosition.X = Math.Clamp(nextPosition.X, -1, boardLimit.X);
-            nextPosition.Y = Math.Clamp(nextPosition.Y, -1, boardLimit.Y);
+            if (nextPosition.X < 0)
+                nextPosition.X = -1;
+            if (Radius + nextPosition.X > owner.BoardSize.X)
+                nextPosition.X = owner.BoardSize.X - Radius + 1;
+
+            if (nextPosition.Y < 0)
+                nextPosition.Y = -1;
+            if (Radius + nextPosition.Y > owner.BoardSize.Y)
+                nextPosition.Y = owner.BoardSize.Y - Radius + 1;
             return nextPosition;
         }
 

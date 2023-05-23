@@ -28,7 +28,7 @@
 
         <StackPanel Grid.Row="1" VerticalAlignment="Center">
             <Canvas x:Name="BallCanvas" Height="400" Width="650">
-                <Border BorderBrush="#707070" BorderThickness="1" Height="417" Width="651" Canvas.Left="-1" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <Border BorderBrush="#707070" BorderThickness="1" Height="401" Width="651" Canvas.Left="-1" HorizontalAlignment="Center" VerticalAlignment="Top"/>
 
                 <ItemsControl ItemsSource="{Binding Path = Balls}">
                     <ItemsControl.ItemTemplate>

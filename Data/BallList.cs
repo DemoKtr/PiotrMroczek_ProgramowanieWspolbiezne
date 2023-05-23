@@ -15,7 +15,7 @@ namespace Data
         private const int MinRadius = 25;
         private const int MaxRadius = 30;
         
-        private readonly List<IBall>? ballsList;
+        private readonly List<IBall> ballsList;
 
 
         public BallList(Vector2 boardSize) : base(boardSize)
@@ -25,7 +25,7 @@ namespace Data
         public override void Add(int howMany)
         {
             var rand = new Random();
-            for (int i = 0; i < howMany; i++)
+            for (var i = 0; i < howMany; i++)
             {
                 var radius = rand.Next(MinRadius, MaxRadius);
                 var weight = rand.Next(25, 50);
@@ -72,8 +72,7 @@ namespace Data
 
                 isPositionCorrect = this.CheckIsSpaceFree(new Vector2(x, y), ballRadius);
 
-                if (i >= 100)
-                    throw new NoAvailableSpaceForNewBallException();
+               
                 i++;
             }
 
@@ -123,5 +122,3 @@ namespace Data
         }
     }
 }
-internal class NoAvailableSpaceForNewBallException : Exception
-{ }

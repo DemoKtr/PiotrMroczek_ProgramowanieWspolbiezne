@@ -182,22 +182,22 @@ namespace VM1
                     this.OnPropertyChanged();
                 }
             }
-            public double X
+            public float X
             {
                 get => pos.X;
                 set
                 {
-                    pos.X = (float)value;
+                    pos.X = value;
                     OnPropertyChanged();
                 }
             }
 
-            public double Y
+            public float Y
             {
                 get => pos.Y;
                 set
                 {
-                    pos.Y = (float)value;
+                    pos.Y = value;
                     OnPropertyChanged();
                 }
             }
