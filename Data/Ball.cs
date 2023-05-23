@@ -29,21 +29,18 @@ namespace Data
         public float Radius { get; set; }
         public int ID { get; }
 
-        public async void Simulate()
+        public async Task Simulate()
         {
             var sw = new Stopwatch();
-            var deltaTime = 0.001f;
+            var deltaTime = 0f;
             while (!owner.CancelSimulationSource.Token.IsCancellationRequested)
             {
                 sw.Start();
                 var newArgs = new OnBallPositionChangeEventArgs(this);
                 PositionChange?.Invoke(this, newArgs);
-
                 var nextPosition = Position + Vector2.Multiply(Velocity, deltaTime);
                 Position = this.ClampPosition(nextPosition);
-
-                await Task.Delay(2, owner.CancelSimulationSource.Token).ContinueWith(_ => { });
-
+                await Task.Delay(8, owner.CancelSimulationSource.Token).ContinueWith(_ => { });
                 sw.Stop();
                 deltaTime = sw.ElapsedMilliseconds / 1000f;
                 sw.Reset();

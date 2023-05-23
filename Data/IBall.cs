@@ -14,7 +14,7 @@ namespace Data
         float Mass { get;  }
         float Radius { get; }
         int ID { get; }
-        public void Simulate();
+        public Task Simulate();
 
         public event EventHandler<OnBallPositionChangeEventArgs>? PositionChange;
     }

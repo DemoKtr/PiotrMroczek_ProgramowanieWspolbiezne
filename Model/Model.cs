@@ -48,7 +48,9 @@ namespace Model
         private void PrepareBallsLogic()
         {
             ballsLogic = BallLogicAPI.CreateBallsLogic(boardSize);
+#pragma warning disable CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
             ballsLogic.PositionChange += this.OnBallsLogicOnPositionChange;
+#pragma warning restore CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
         }
         private void OnBallsLogicOnPositionChange(object sender, Logic.OnPositionChangeEventArgs args)
         {

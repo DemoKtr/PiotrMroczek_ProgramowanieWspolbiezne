@@ -28,14 +28,13 @@ namespace Logic
             dataBalls.Add(howMany);
 
         }
-
-       
-
-      
+  
         public override void Start()
         {
 
+#pragma warning disable CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
             dataBalls.PositionChange += this.OnDataBallsOnPositionChange;
+#pragma warning restore CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
             dataBalls.Start();
         }
 
@@ -85,7 +84,7 @@ namespace Logic
                     continue;
                 }
 
-                if (IsBallsCollides(ball, ballTwo))
+                if (AreBallSColliding(ball, ballTwo))
                 {
                     return ballTwo;
                 }
@@ -94,20 +93,23 @@ namespace Logic
             return null;
         }
 
-        private static bool IsBallsCollides(IBall ballOne, IBall ballTwo)
+        private static bool AreBallSColliding(IBall ballOne, IBall ballTwo)
         {
-            var centerOne = ballOne.Position + (Vector2.One * ballOne.Radius / 2) + ballOne.Velocity * (16 / 1000f);
-            var centerTwo = ballTwo.Position + (Vector2.One * ballTwo.Radius / 2) + ballTwo.Velocity * (16 / 1000f);
+            var centerOne = GetBallCenterWithVelocity(ballOne);
+            var centerTwo = GetBallCenterWithVelocity(ballTwo);
 
             var distance = Vector2.Distance(centerOne, centerTwo);
             var radiusSum = (ballOne.Radius + ballTwo.Radius) / 2f;
 
             return distance <= radiusSum;
         }
-
+        private static Vector2 GetBallCenterWithVelocity(IBall ball)
+        {
+            return ball.Position + (Vector2.One * ball.Radius / 2) + ball.Velocity * GetTimeDelta();
+        }
         public static void CollideWithWalls(IBall ball, Vector2 boardSize)
         {
-            var position = ball.Position + ball.Velocity * (16 / 1000f);
+            var position = ball.Position + ball.Velocity * GetTimeDelta();
             if (position.X <= 0 || position.X + ball.Radius >= boardSize.X)
             {
                 ball.Velocity = new Vector2(-ball.Velocity.X, ball.Velocity.Y);
@@ -119,27 +121,31 @@ namespace Logic
             }
         }
 
-        public static void HandleCollision(IBall ballOne, IBall ballTwo)
+        public static void HandleCollision(IBall firstBall, IBall secondBall)
         {
-            var centerOne = ballOne.Position + (Vector2.One * ballOne.Radius / 2);
-            var centerTwo = ballTwo.Position + (Vector2.One * ballTwo.Radius / 2);
+            var centerOne = firstBall.Position + (Vector2.One * firstBall.Radius / 2);
+            var centerTwo = secondBall.Position + (Vector2.One * secondBall.Radius / 2);
 
             var unitNormalVector = Vector2.Normalize(centerTwo - centerOne);
             var unitTangentVector = new Vector2(-unitNormalVector.Y, unitNormalVector.X);
 
-            var velocityOneNormal = Vector2.Dot(unitNormalVector, ballOne.Velocity);
-            var velocityOneTangent = Vector2.Dot(unitTangentVector, ballOne.Velocity);
-            var velocityTwoNormal = Vector2.Dot(unitNormalVector, ballTwo.Velocity);
-            var velocityTwoTangent = Vector2.Dot(unitTangentVector, ballTwo.Velocity);
+            var velocityOneNormal = Vector2.Dot(unitNormalVector, firstBall.Velocity);
+            var velocityOneTangent = Vector2.Dot(unitTangentVector, firstBall.Velocity);
+            var velocityTwoNormal = Vector2.Dot(unitNormalVector, secondBall.Velocity);
+            var velocityTwoTangent = Vector2.Dot(unitTangentVector, secondBall.Velocity);
 
-            var newNormalVelocityOne = (velocityOneNormal * (ballOne.Mass - ballTwo.Mass) + 2 * ballTwo.Mass * velocityTwoNormal) / (ballOne.Mass + ballTwo.Mass);
-            var newNormalVelocityTwo = (velocityTwoNormal * (ballTwo.Mass - ballOne.Mass) + 2 * ballOne.Mass * velocityOneNormal) / (ballOne.Mass + ballTwo.Mass);
+            var newNormalVelocityOne = (velocityOneNormal * (firstBall.Mass - secondBall.Mass) + 2 * secondBall.Mass * velocityTwoNormal) / (firstBall.Mass + secondBall.Mass);
+            var newNormalVelocityTwo = (velocityTwoNormal * (secondBall.Mass - firstBall.Mass) + 2 * firstBall.Mass * velocityOneNormal) / (firstBall.Mass + secondBall.Mass);
 
             var newVelocityOne = Vector2.Multiply(unitNormalVector, newNormalVelocityOne) + Vector2.Multiply(unitTangentVector, velocityOneTangent);
             var newVelocityTwo = Vector2.Multiply(unitNormalVector, newNormalVelocityTwo) + Vector2.Multiply(unitTangentVector, velocityTwoTangent);
 
-            ballOne.Velocity = newVelocityOne;
-            ballTwo.Velocity = newVelocityTwo;
+            firstBall.Velocity = newVelocityOne;
+            secondBall.Velocity = newVelocityTwo;
+        }
+        private static float GetTimeDelta()
+        {
+            return 16f / 1000f;
         }
     }
 }
