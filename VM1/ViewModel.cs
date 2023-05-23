@@ -16,11 +16,11 @@ namespace VM1
         public event PropertyChangedEventHandler? PropertyChanged;
         private Model.Model model;
         public AsyncObservableCollection<BallPosition> Balls { get; set; }
-        public ICommand AddButton { get; }
-        public ICommand RemoveButton { get; }
-        public ICommand StartButton { get; }
-        public ICommand StopButton { get; }
-        private bool bisSimulating=false;
+        public ISimpleCommand AddButton { get; }
+        public ISimpleCommand RemoveButton { get; }
+        public ISimpleCommand StartButton { get; }
+        public ISimpleCommand StopButton { get; }
+
         public ViewModel()
         {
             Balls = new AsyncObservableCollection<BallPosition>();
@@ -30,46 +30,49 @@ namespace VM1
 
             AddButton = new RelayCommand(() =>
             {
-                if(BallsCount < 10)
+
                 BallsCount += 1;
             });
             RemoveButton = new RelayCommand(() =>
             {
-                if (BallsCount > 0)
-                    BallsCount -= 1;
+
+                BallsCount -= 1;
             });
 
             StartButton = new RelayCommand(() =>
             {
-                if (!bisSimulating) { 
                 model.SetBallNumber(BallsCount);
 
-                for (int i = 0; i < BallsCount; i++)
+                for (var i = 0; i < BallsCount; i++)
                 {
                     Balls.Add(new BallPosition());
                 }
 
-                model.BallPositionChange += (sender, argv) =>
+                model.BallPositionChange += (sender, args) =>
                 {
-                    if (Balls.Count > 0)
-                        Balls[argv.Id].ChangePosition(argv.Position);
+                    if (Balls.Count <= 0) return;
+
+                    for (var i = 0; i < BallsCount; i++)
+                    {
+                        Balls[args.Ball.ID].Position = args.Ball.Position;
+                        Balls[args.Ball.ID].Radius = args.Ball.Radius;
+                    }
                 };
                 model.StartSimulation();
-                    bisSimulating = true;
-                }
+                this.ToggleSimulationButtons();
             });
 
             StopButton = new RelayCommand(() =>
             {
-                if (bisSimulating) { 
                 model.StopSimulation();
                 Balls.Clear();
                 model.SetBallNumber(BallsCount);
-                    bisSimulating=false;
-                }
-
+                this.ToggleSimulationButtons();
             });
+            StopButton.IsEnabled = false;
         }
+
+
         public int BallsCount
         {
             get { return model.GetBallsCount(); }
@@ -82,64 +85,138 @@ namespace VM1
                 }
             }
         }
-
+        private void ToggleSimulationButtons()
+        {
+            AddButton.IsEnabled = !AddButton.IsEnabled;
+            RemoveButton.IsEnabled = !RemoveButton.IsEnabled;
+            StartButton!.IsEnabled = !StartButton!.IsEnabled;
+            StopButton!.IsEnabled = !StopButton!.IsEnabled;
+        }
         // Updates
 
         protected virtual void OnPropertyChanged([CallerMemberName] string caller = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(caller));
         }
+
+        public interface ISimpleCommand : ICommand
+        {
+            public bool IsEnabled { get; set; }
+        }
+
+        public class RelayCommand : ISimpleCommand
+        {
+            private readonly Action handler;
+            private bool isEnabled;
+
+            public RelayCommand(Action handler)
+            {
+                this.handler = handler;
+                IsEnabled = true;
+            }
+
+            public bool IsEnabled
+            {
+                get { return isEnabled; }
+                set
+                {
+                    if (value != isEnabled)
+                    {
+                        isEnabled = value;
+                        CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+                    }
+                }
+            }
+
+            public event EventHandler? CanExecuteChanged;
+
+            public bool CanExecute(object? parameter)
+            {
+                return isEnabled;
+            }
+
+            public void Execute(object? parameter)
+            {
+                handler();
+            }
+        }
+
+
+
+
+
+
+
+        public class BallPosition : INotifyPropertyChanged
+        {
+
+            private Vector2 pos;
+            private float radius;
+
+            public BallPosition()
+            {
+                this.pos = Vector2.Zero;
+                this.radius = 0;
+            }
+
+
+            public Vector2? Position
+            {
+                get => pos;
+                set
+                {
+                    this.X = value?.X ?? 0;
+                    this.Y = value?.Y ?? 0;
+                    this.OnPropertyChanged();
+                }
+            }
+
+            public float Radius
+            {
+                get => radius;
+                set
+                {
+                    radius = value;
+                    this.OnPropertyChanged();
+                }
+            }
+            public double X
+            {
+                get => pos.X;
+                set
+                {
+                    pos.X = (float)value;
+                    OnPropertyChanged();
+                }
+            }
+
+            public double Y
+            {
+                get => pos.Y;
+                set
+                {
+                    pos.Y = (float)value;
+                    OnPropertyChanged();
+                }
+            }
+
+
+
+
+
+
+
+
+
+#pragma warning disable CS8612 // Nullability of reference types in type doesn't match implicitly implemented member.
+            public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS8612 // Nullability of reference types in type doesn't match implicitly implemented member.
+            private void OnPropertyChanged([CallerMemberName] string caller = "")
+            {
+                var args = new PropertyChangedEventArgs(caller);
+                PropertyChanged?.Invoke(this, args);
+            }
+        }
+
     }
-
-
-
-
-
-
-
-    public class BallPosition : INotifyPropertyChanged
-    {
-        private Vector2 pos;
-        public float X
-        {
-            get { return pos.X; }
-            set { pos.X = value; OnPropertyChanged(); }
-        }
-        public float Y
-        {
-            get { return pos.Y; }
-            set { pos.Y = value; OnPropertyChanged(); }
-        }
-
-        public BallPosition(float x, float y)
-        {
-            X = x;
-            Y = y;
-        }
-        public BallPosition(Vector2 position)
-        {
-            X = position.X;
-            Y = position.Y;
-        }
-
-        public BallPosition()
-        {
-            X = 0;
-            Y = 0;
-        }
-
-        public void ChangePosition(Vector2 position)
-        {
-            this.X = position.X;
-            this.Y = position.Y;
-        }
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected virtual void OnPropertyChanged([CallerMemberName] string caller = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(caller));
-        }
-    }
-
 }
