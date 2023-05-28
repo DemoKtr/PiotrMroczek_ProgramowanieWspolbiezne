@@ -13,61 +13,75 @@ namespace Data
     {
         private readonly string logFilePath;
         private Task? loggingTask;
-        private ConcurrentQueue<IBall> ballQueue = new ConcurrentQueue<IBall>();
+        private readonly ConcurrentQueue<JObject> ballQueue = new ConcurrentQueue<JObject>();
         private readonly Mutex queueMutex = new Mutex();
-
+        private readonly JArray fileDataArray;
+        private Mutex fileMutex = new Mutex();
         public BallListLogger() {
             string tempPath = Path.GetTempPath();
             logFilePath = tempPath + "balls.json";
-
-        }
-
-        private async Task LogToFile()
-        {
-            JArray array;
             if (File.Exists(logFilePath))
             {
                 try
                 {
-                    array = JArray.Parse(await File.ReadAllTextAsync(logFilePath));
+                    string input = File.ReadAllText(logFilePath);
+                    fileDataArray = JArray.Parse(input);
+                    return;
                 }
                 catch (JsonReaderException)
                 {
-                    array = new JArray();
+                    fileDataArray = new JArray();
                 }
             }
-            else
+
+            fileDataArray = new JArray();
+            File.Create(logFilePath);
+        }
+        ~BallListLogger()
+        {
+            fileMutex.WaitOne();
+            fileMutex.ReleaseMutex();
+        }
+        private async Task LogToFile()
+        {
+            while (ballQueue.TryDequeue(out JObject ball))
             {
-                array = new JArray();
-                File.Create(logFilePath);
-            }
-            IBall ball;
-            while (ballQueue.TryDequeue(out ball))
-            {
-                JObject itemToAdd = JObject.FromObject(ball);
-                array.Add(itemToAdd);
+                fileDataArray.Add(ball);
             }
 
-            string output = JsonConvert.SerializeObject(array);
-            await File.WriteAllTextAsync(logFilePath, output);
+          
+            string output = JsonConvert.SerializeObject(fileDataArray);
+
+            fileMutex.WaitOne();
+            try
+            {
+                await File.WriteAllTextAsync(logFilePath, output);
+            }
+            finally
+            {
+                fileMutex.ReleaseMutex();
+            }
         }
         public async void AddToLogQueue(IBall ball)
         {
             queueMutex.WaitOne();
             try
             {
-                ballQueue.Enqueue(ball);
+                JObject itemToAdd = JObject.FromObject(ball);
+                ballQueue.Enqueue(itemToAdd);
+
+
+                if (loggingTask == null || loggingTask.IsCompleted)
+                {
+                    loggingTask = Task.Factory.StartNew(this.LogToFile);
+                }
             }
             finally
             {
                 queueMutex.ReleaseMutex();
             }
-
-            if (loggingTask != null && !loggingTask.IsCompleted)
-                return;
-
-            loggingTask = this.LogToFile();
         }
+        
     }
 }
 
