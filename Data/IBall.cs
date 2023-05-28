@@ -18,14 +18,7 @@ namespace Data
         public Task Simulate();
 
         public event EventHandler<OnBallPositionChangeEventArgs>? PositionChange;
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("ID", ID);
-            info.AddValue("Radius", Radius);
-            info.AddValue("Mass", Mass);
-            info.AddValue("Position", Position);
-            info.AddValue("Velocity", Velocity);
-        }
+       
     }
     public class OnBallPositionChangeEventArgs
     {
@@ -35,5 +28,9 @@ namespace Data
         {
             this.Ball = ball;
         }
+    }
+    internal interface IBallListLogger
+    {
+        void AddToLogQueue(IBall ball);
     }
 }

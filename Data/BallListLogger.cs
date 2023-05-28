@@ -9,18 +9,32 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 namespace Data
 {
-    internal class BallListLogger
+    internal class BallListLogger : IBallListLogger
     {
-        public static string logFilePath = "%TEMP%/Balls/ballsLog.json";
+        private readonly string logFilePath;
         private Task? loggingTask;
         private ConcurrentQueue<IBall> ballQueue = new ConcurrentQueue<IBall>();
         private readonly Mutex queueMutex = new Mutex();
+
+        public BallListLogger() {
+            string tempPath = Path.GetTempPath();
+            logFilePath = tempPath + "balls.json";
+
+        }
+
         private async Task LogToFile()
         {
             JArray array;
             if (File.Exists(logFilePath))
             {
-                array = JArray.Parse(File.ReadAllText(logFilePath));
+                try
+                {
+                    array = JArray.Parse(await File.ReadAllTextAsync(logFilePath));
+                }
+                catch (JsonReaderException)
+                {
+                    array = new JArray();
+                }
             }
             else
             {
@@ -35,7 +49,7 @@ namespace Data
             }
 
             string output = JsonConvert.SerializeObject(array);
-            File.WriteAllText(logFilePath, output);
+            await File.WriteAllTextAsync(logFilePath, output);
         }
         public async void AddToLogQueue(IBall ball)
         {
@@ -49,10 +63,10 @@ namespace Data
                 queueMutex.ReleaseMutex();
             }
 
-            if (loggingTask != null || loggingTask.IsCompleted.Equals("false"))
+            if (loggingTask != null && !loggingTask.IsCompleted)
                 return;
 
-            loggingTask = Task.Run(this.LogToFile);
+            loggingTask = this.LogToFile();
         }
     }
 }
