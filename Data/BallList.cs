@@ -14,7 +14,6 @@ namespace Data
         private const int MinStartSpeed = 100;
         private const int MinRadius = 25;
         private const int MaxRadius = 30;
-        
         private readonly List<IBall> ballsList;
 
 

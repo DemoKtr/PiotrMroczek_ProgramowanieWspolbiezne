@@ -17,7 +17,6 @@ namespace Data
         private readonly Mutex queueMutex = new Mutex();
         private async Task LogToFile()
         {
-            //If file doesnt exists create new one.
             JArray array;
             if (File.Exists(logFilePath))
             {
@@ -28,8 +27,6 @@ namespace Data
                 array = new JArray();
                 File.Create(logFilePath);
             }
-
-            //Append logs until queue empty
             IBall ball;
             while (ballQueue.TryDequeue(out ball))
             {
@@ -37,7 +34,6 @@ namespace Data
                 array.Add(itemToAdd);
             }
 
-            // Convert data to string and save it
             string output = JsonConvert.SerializeObject(array);
             File.WriteAllText(logFilePath, output);
         }

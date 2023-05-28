@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -50,7 +51,14 @@ namespace Data
                 
             }
         }
-
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("ID", ID);
+            info.AddValue("Radius", Radius);
+            info.AddValue("Mass", Mass);
+            info.AddValue("Position", Position);
+            info.AddValue("Velocity", Velocity);
+        }
         public void CreateMovementTask()
         {
             
