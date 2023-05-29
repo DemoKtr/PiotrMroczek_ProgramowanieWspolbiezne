@@ -20,6 +20,7 @@ namespace Data
         public BallListLogger() {
             string tempPath = Path.GetTempPath();
             logFilePath = tempPath + "balls.json";
+
             if (File.Exists(logFilePath))
             {
                 try
@@ -62,7 +63,7 @@ namespace Data
                 fileMutex.ReleaseMutex();
             }
         }
-        public async void AddToLogQueue(IBall ball)
+        public void AddToLogQueue(IBall ball)
         {
             queueMutex.WaitOne();
             try
@@ -70,7 +71,6 @@ namespace Data
                 JObject itemToAdd = JObject.FromObject(ball);
                 itemToAdd["Time"] = DateTime.Now.ToString("HH:mm:ss");
                 ballQueue.Enqueue(itemToAdd);
-
 
                 if (loggingTask == null || loggingTask.IsCompleted)
                 {
