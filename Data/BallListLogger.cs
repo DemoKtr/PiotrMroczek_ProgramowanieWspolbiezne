@@ -55,7 +55,7 @@ namespace Data
             fileMutex.WaitOne();
             try
             {
-                await File.WriteAllTextAsync(logFilePath, output);
+                File.WriteAllText(logFilePath, output);
             }
             finally
             {
@@ -68,6 +68,7 @@ namespace Data
             try
             {
                 JObject itemToAdd = JObject.FromObject(ball);
+                itemToAdd["Time"] = DateTime.Now.ToString("HH:mm:ss");
                 ballQueue.Enqueue(itemToAdd);
 
 

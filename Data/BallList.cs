@@ -15,7 +15,7 @@ namespace Data
         private const int MinRadius = 25;
         private const int MaxRadius = 30;
         private readonly List<IBall> ballsList;
-
+        private readonly IBallListLogger ballListLogger = new BallListLogger();
 
         public BallList(Vector2 boardSize) : base(boardSize)
         {
@@ -79,6 +79,7 @@ namespace Data
         }
         private void OnBallOnPositionChange(object? sender, OnBallPositionChangeEventArgs args)
         {
+           // ballListLogger.AddToLogQueue(args.Ball);
             var newArgs = new OnPositionChangeEventArgs(args.Ball, new List<IBall>(ballsList));
             this.OnPositionChange(newArgs);
         }
